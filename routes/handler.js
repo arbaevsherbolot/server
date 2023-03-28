@@ -5,8 +5,6 @@ const router = express.Router();
 
 const fs = require("fs");
 
-const WriteEventLog = require("../WriteEventLog");
-
 router.get("/result", async (req, res) => {
   fs.readFile("./database/namesHistory.json", "utf-8", (err, jsonString) => {
     if (err) {
@@ -31,7 +29,28 @@ router.get("/result", async (req, res) => {
 router.post("/sendData", async (req, res) => {
   let { name } = req.body;
 
-  WriteEventLog(name);
+  fs.readFile("./database/namesHistory.json", "utf-8", (err, data) => {
+    if (err) {
+      console.log("As error occurred: ", err.message);
+    } else {
+      const dataJson = JSON.parse(data);
+
+      let newName = ` ${name}`;
+      dataJson.names.push(newName);
+
+      fs.writeFile(
+        "./database/namesHistory.json",
+        JSON.stringify(dataJson),
+        (err) => {
+          if (err) {
+            console.log("Error is:", err.message);
+          } else {
+            console.log("Names updated!");
+          }
+        }
+      );
+    }
+  });
 });
 
 module.exports = router;
